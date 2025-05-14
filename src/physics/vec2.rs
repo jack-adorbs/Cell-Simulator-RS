@@ -2,8 +2,7 @@ use num::Integer;
 
 use std::{num::TryFromIntError, ops::{Add, AddAssign}};
 
-// Implement ording logic to allow for clamp.
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Vec2<T> {
     pub x: T,
     pub y: T,

@@ -1,6 +1,7 @@
 use crate::physics::vec2::Vec2;
 use crate::physics::object::Object;
 
+#[derive(Clone)]
 pub struct Cell {
     pub _health: u8,
     pub _energy: u8,
@@ -16,28 +17,32 @@ impl Cell {
         }
     }
 
-    pub fn move_by(&mut self, location: Vec2<i16>, max: (u32, u32)) {
-        let mut n: Vec2<i32> = (self.object.location.clone() + location).into(); 
-        let x: i32 = max.0.try_into().unwrap();
-        let y: i32 = max.1.try_into().unwrap(); 
+
+    pub fn window_bounds_correction(object: &mut Object, max: (u32, u32)) {
+        let x: i16 = max.0.try_into().unwrap();
+        let y: i16 = max.1.try_into().unwrap(); 
 
         
-        if n.x < 0 {
-            n.x = 0;
+        if object.location.x < 0 {
+            object.location.x = 0;
         }
 
-        if n.y < 0 {
-            n.y = 0;
+        if object.location.y < 0 {
+            object.location.y = 0;
         }
 
-        if n.x > x {
-            n.x = x;
+        if object.location.x > x {
+            object.location.x = x;
         }
 
-        if n.y > y {
-            n.y = y;
+        if object.location.y > y {
+            object.location.y = y;
         }
+    }
 
-        self.object.location = n.try_into().unwrap();
+    pub fn move_by(&mut self, location: Vec2<i16>, max: (u32, u32)) {
+        let n = &mut Object::new(0, (self.object.location.clone() + location).into()); 
+        Cell::window_bounds_correction(n, max);
+        self.object.location = n.location.clone();
     }
 }

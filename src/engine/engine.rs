@@ -1,5 +1,7 @@
 extern crate sdl2;
 
+use::std::cell::RefCell;
+
 use rand::rngs::ThreadRng;
 use rand::{Rng};
 use sdl2::pixels::Color;
@@ -13,7 +15,7 @@ use crate::physics::vec2::Vec2;
 
 pub struct Engine<'e> {
     pub canvas: &'e mut Canvas<Window>,
-    cells: Vec<Cell>,
+    cells: RefCell<Vec<Cell>>,
     _food: Vec<Food>,
     rng: ThreadRng
 }
@@ -22,7 +24,7 @@ impl<'e> Engine<'e> {
     pub fn new(canvas: &'e mut Canvas<Window>) -> Self {
         Self { 
             canvas, 
-            cells: Vec::new(),
+            cells: RefCell::new(Vec::new()),
             _food: Vec::new(),
             rng: rand::rng()
         }
@@ -46,22 +48,44 @@ impl<'e> Engine<'e> {
     } 
 
     pub fn add_cell(&mut self, cell: Cell) {
-        self.cells.push(cell);
+        self.cells.borrow_mut().push(cell);
+    }
+
+    fn update_cell(&mut self, idx: usize) {
+        let x = self.rng.random_range(-1..=1);
+        let y = self.rng.random_range(-1..=1);
+
+        let mut cells = self.cells.borrow_mut();
+        let tmp = Object::new(cells[idx].object.size, cells[idx].object.location + Vec2::new(x, y));
+        
+        // Does not update cell value at finding itself or colliding with a cell.
+        let mut i = 0;
+        while i < cells.len() {
+            match tmp.collision(&cells[i].object, 1.25) {
+                Ok(b) => if !b {
+                    return;
+                }
+                Err(()) => ()
+            }
+            i += 1;
+        }
+
+        cells[idx].move_by(
+            Vec2::new(x, y), 
+            self.canvas.window().drawable_size()
+        );
     }
 
     pub fn update_cells(&mut self) {
-        for cell in self.cells.as_mut_slice() {
-            let x = self.rng.random_range(-1..=1);
-            let y = self.rng.random_range(-1..=1);
-            cell.move_by(
-                Vec2::new(x, y),
-                self.canvas.window().size()
-            );
+        let mut idx = 0;
+        while idx < self.cells.borrow().len() {
+            self.update_cell(idx);
+            idx += 1
         }
     }
 
     pub fn draw_cells(&mut self) {
-        self.cells.iter().for_each(|cell | {
+        self.cells.borrow_mut().iter().for_each(|cell | {
             primitives::DrawRenderer::filled_circle(
                 self.canvas, 
                 cell.object.location.x as i16, 
