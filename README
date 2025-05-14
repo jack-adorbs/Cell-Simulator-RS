@@ -1,0 +1,7 @@
+# Cell Simulator RS
+
+This is intended to be a basic rust project for myself to get familiar with 
+the language. It is still a work in process. I will probably stop once I have 
+basic cell behaviour but may come back to it in future.
+
+This project uses SDL2 and SDL2_GFX for it's graphics.

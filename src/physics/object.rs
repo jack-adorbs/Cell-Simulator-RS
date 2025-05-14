@@ -24,7 +24,6 @@ impl Object {
             other.location.x+other.size, 
             other.location.y+other.size
         );
-
         
         false
     }
