@@ -29,17 +29,12 @@ impl Object {
             return Err(());
         }
 
-        // Cicrcle-Circle Intersection: |r1 - r2| < d < r1 + r2
-        let rabs: f32 = 
-            ((self.size as f32)*collision_scale - 
-            (r2.size as f32)*collision_scale)
-            .abs();
-
+        // (r1+r2)*c = d*c
         let d = (
             (r2.location.x - self.location.x).pow(2) + 
             (r2.location.y - self.location.y).pow(2)
         ).isqrt();
-
-        Ok(rabs < d.into() && d < (self.size + r2.size))
+ 
+        Ok((((self.size + r2.size) as f32)*collision_scale) == (d as f32)*collision_scale)
     }
 }

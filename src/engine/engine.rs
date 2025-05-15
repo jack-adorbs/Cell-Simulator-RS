@@ -56,14 +56,15 @@ impl<'e> Engine<'e> {
         let y = self.rng.random_range(-1..=1);
 
         let mut cells = self.cells.borrow_mut();
-        let tmp = Object::new(cells[idx].object.size, cells[idx].object.location + Vec2::new(x, y));
+        let mut tmp = Object::new(cells[idx].object.size, cells[idx].object.location + Vec2::new(x, y));
         
         // Does not update cell value at finding itself or colliding with a cell.
         let mut i = 0;
         while i < cells.len() {
-            match tmp.collision(&cells[i].object, 1.25) {
-                Ok(b) => if !b {
-                    return;
+            match tmp.collision(&cells[i].object, 1.5) {
+                Ok(b) => if b { //TODO: Fix Collision Behaviour.
+                    tmp.location.x *= -1;
+                    tmp.location.y *= -1;
                 }
                 Err(()) => ()
             }
@@ -93,7 +94,15 @@ impl<'e> Engine<'e> {
                 cell.object.size, 
                 Color::BLACK
             ).unwrap();
+            
+            // Debuging Circle.
+            primitives::DrawRenderer::circle(
+                    self.canvas, 
+                    cell.object.location.x as i16, 
+                    cell.object.location.y as i16, 
+                    ((cell.object.size as f32) *1.5) as i16, 
+                    Color::RED
+                ).unwrap();
         });
-        
     }
 }
